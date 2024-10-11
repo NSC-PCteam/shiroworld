@@ -1,64 +1,98 @@
-// These codes are licensed under CC0.
-// http://creativecommons.org/publicdomain/zero/1.0/deed.ja
-
 using UnityEngine;
 
-/// <summary>
-/// The camera added this script will follow the specified object.
-/// The camera can be moved by left mouse drag and mouse wheel.
-/// </summary>
 [ExecuteInEditMode, DisallowMultipleComponent]
-public class Cameracontroller : MonoBehaviour
+public class CameraController : MonoBehaviour
 {
-    public GameObject target; // an object to follow
-    public Vector3 offset; // offset form the target object
+    public Transform target;
 
-    [SerializeField] private float distance = 4.0f; // distance from following object
-    [SerializeField] private float polarAngle = 45.0f; // angle with y-axis
-    [SerializeField] private float azimuthalAngle = 45.0f; // angle with x-axis
+    [SerializeField] private float distance = 20.0f;
+    [SerializeField] private float polarAngle = 45.0f;
+    [SerializeField] private float azimuthalAngle = 45.0f;
 
     [SerializeField] private float minDistance = 1.0f;
-    [SerializeField] private float maxDistance = 20.0f;
+    [SerializeField] private float maxDistance = 100.0f;
     [SerializeField] private float minPolarAngle = 5.0f;
     [SerializeField] private float maxPolarAngle = 75.0f;
     [SerializeField] private float mouseXSensitivity = 5.0f;
     [SerializeField] private float mouseYSensitivity = 5.0f;
     [SerializeField] private float scrollSensitivity = 5.0f;
-
-    void LateUpdate()
+    [SerializeField] private float moveSpeed = 2.0f;
+    private Vector3 offset;
+    void Start()
     {
-        if (Input.GetMouseButton(1)) {
-            updateAngle(Input.GetAxis("Mouse X"), Input.GetAxis("Mouse Y"));
+        if (target != null)
+        {
+            offset = transform.position - target.position;
         }
-        updateDistance(Input.GetAxis("Mouse ScrollWheel"));
-
-        var lookAtPos = target.transform.position + offset;
-        updatePosition(lookAtPos);
-        transform.LookAt(lookAtPos);
     }
+    void LateUpdate()
+{
+    // 右ドラッグでカメラの回転
+    if (Input.GetMouseButton(1))
+    {
+        updateAngle(Input.GetAxis("Mouse X"), Input.GetAxis("Mouse Y"));
+    }
+
+    // マウスホイールでの拡大縮小
+    updateDistance(Input.GetAxis("Mouse ScrollWheel"));
+
+    // WASDキーでの移動
+    Vector3 moveDirection = Vector3.zero;
+    if (Input.GetKey(KeyCode.W)) moveDirection += Vector3.forward; // 前
+    if (Input.GetKey(KeyCode.A)) moveDirection += Vector3.left; // 左
+    if (Input.GetKey(KeyCode.S)) moveDirection += Vector3.back; // 後
+    if (Input.GetKey(KeyCode.D)) moveDirection += Vector3.right; // 右
+
+    // Up/Down arrow movement
+    if (Input.GetKey(KeyCode.UpArrow)) {
+        moveDirection += Vector3.up; // 上
+    }
+    if (Input.GetKey(KeyCode.DownArrow)) {
+        moveDirection += Vector3.down; // 下
+    }
+
+    // カメラのローカル座標で移動
+    if (moveDirection.magnitude > 0)
+    {
+        Vector3 move = transform.TransformDirection(moveDirection) * moveSpeed * Time.deltaTime;
+        transform.position += move;
+    }
+
+    // カメラ位置の更新
+    updatePosition();
+
+    // ターゲットを見続ける
+    if (target != null)
+    {
+        transform.LookAt(target.position);
+    }
+}
 
     void updateAngle(float x, float y)
     {
-        x = azimuthalAngle - x * mouseXSensitivity;
-        azimuthalAngle = Mathf.Repeat(x, 360);
+        azimuthalAngle -= x * mouseXSensitivity;
+        azimuthalAngle = Mathf.Repeat(azimuthalAngle, 360);
 
-        y = polarAngle + y * mouseYSensitivity;
-        polarAngle = Mathf.Clamp(y, minPolarAngle, maxPolarAngle);
+        polarAngle += y * mouseYSensitivity;
+        polarAngle = Mathf.Clamp(polarAngle, minPolarAngle, maxPolarAngle);
     }
 
     void updateDistance(float scroll)
     {
-        scroll = distance - scroll * scrollSensitivity;
-        distance = Mathf.Clamp(scroll, minDistance, maxDistance);
+        distance -= scroll * scrollSensitivity;
+        distance = Mathf.Clamp(distance, minDistance, maxDistance);
     }
 
-    void updatePosition(Vector3 lookAtPos)
+    void updatePosition()
     {
         var da = azimuthalAngle * Mathf.Deg2Rad;
         var dp = polarAngle * Mathf.Deg2Rad;
+
+        // ターゲットの位置を基準にカメラを配置
+        Vector3 targetPosition = target != null ? target.position : Vector3.zero;
         transform.position = new Vector3(
-            lookAtPos.x + distance * Mathf.Sin(dp) * Mathf.Cos(da),
-            lookAtPos.y + distance * Mathf.Cos(dp),
-            lookAtPos.z + distance * Mathf.Sin(dp) * Mathf.Sin(da));
+            targetPosition.x + distance * Mathf.Sin(dp) * Mathf.Cos(da),
+            targetPosition.y + distance * Mathf.Cos(dp),
+            targetPosition.z + distance * Mathf.Sin(dp) * Mathf.Sin(da));
     }
 }

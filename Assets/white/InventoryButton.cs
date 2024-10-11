@@ -1,14 +1,15 @@
 using UnityEngine;
 
-public class CameraSwitcher : MonoBehaviour
+public class InventoryButton : MonoBehaviour
 {
     public Camera camera2; // Camera2の参照
     public Camera camera3; // Camera3の参照
 
     public GameObject canvas1;
-    public GameObject canvas2;
+    
     public GameObject canvas3; // Canvas3の参照
     public GameObject canvas4; // Canvas4の参照
+
 
     void Start()
     {

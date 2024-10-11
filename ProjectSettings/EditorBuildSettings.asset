@@ -4,5 +4,9 @@
 EditorBuildSettings:
   m_ObjectHideFlags: 0
   serializedVersion: 2
-  m_Scenes: []
+  m_Scenes:
+  - enabled: 1
+    path: Assets/white/shirao.unity
+    guid: d0ef6c12a2717c441b7492c4df5e563a
   m_configObjects: {}
+  m_UseUCBPForAssetBundles: 0

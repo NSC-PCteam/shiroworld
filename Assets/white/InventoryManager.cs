@@ -5,11 +5,10 @@ public class InventoryManager : MonoBehaviour
 {
     public GameObject[] blockPrefabs; // 選択できるブロックのプレハブ
     public GameObject selectedBlock; // 現在選択されているブロック
-
     public Button[] blockButtons; // ブロック選択用のボタン
 
     void Start()
-    {
+    {   
         // 各ボタンにイベントを登録
         for (int i = 0; i < blockButtons.Length; i++)
         {
@@ -18,11 +17,18 @@ public class InventoryManager : MonoBehaviour
         }
 
         // 最初のブロックを選択
-        SelectBlock(0);
+        if (blockPrefabs.Length > 0) // プレハブが存在するか確認
+        {
+            SelectBlock(0);
+        }
     }
 
-    public void SelectBlock(int index)
+    // ブロックを選択するメソッド
+    private void SelectBlock(int index)
     {
-        selectedBlock = blockPrefabs[index];
+        if (index >= 0 && index < blockPrefabs.Length)
+        {
+            selectedBlock = blockPrefabs[index]; // 選択されたブロックを設定
+        }
     }
 }
