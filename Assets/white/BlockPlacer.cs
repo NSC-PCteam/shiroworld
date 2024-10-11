@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEngine.UI; // UIを使用するために追加
+using UnityEngine.EventSystems;
 
 public class BlockPlacer : MonoBehaviour
 {
@@ -47,11 +48,12 @@ public class BlockPlacer : MonoBehaviour
             }
         }
     }
-
     void PlaceBlock()
     {
         Ray ray = camera2.ScreenPointToRay(Input.mousePosition);
         RaycastHit hit;
+
+        if(EventSystem.current.IsPointerOverGameObject()) return;
 
         if (Physics.Raycast(ray, out hit, placementDistance))
         {
